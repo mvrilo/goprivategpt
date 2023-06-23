@@ -16,6 +16,20 @@ var (
 	prompt  string
 )
 
+func privategpt(model string, threads, tokens int) *goprivategpt.PrivateGPT {
+	pgpt, err := goprivategpt.New(model, threads, tokens)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pgpt.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return pgpt
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "goprivategpt",
@@ -27,20 +41,12 @@ func main() {
 	flags.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "Number of threads")
 	flags.IntVarP(&tokens, "tokens", "n", 512, "Number of max tokens")
 
-	pgpt, err := goprivategpt.New(model, threads, tokens)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = pgpt.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	askCmd := &cobra.Command{
 		Use:   "ask",
 		Short: "ask completes a given input",
 		Run: func(cmd *cobra.Command, args []string) {
+			pgpt := privategpt(model, threads, tokens)
+
 			text := cmd.Flag("prompt").Value.String()
 			err := pgpt.Predict(text)
 			if err != nil {
@@ -52,7 +58,7 @@ func main() {
 	askCmd.PersistentFlags().StringVarP(&prompt, "prompt", "p", "", "input text")
 	rootCmd.AddCommand(askCmd)
 
-	if err = rootCmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }

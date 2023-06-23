@@ -3,7 +3,7 @@ package goprivategpt
 import (
 	"strings"
 
-	gpt4all "github.com/nomic-ai/gpt4all/gpt4all-bindings/golang"
+	gollama "github.com/go-skynet/go-llama.cpp"
 )
 
 type PrivateGPT struct {
@@ -13,7 +13,7 @@ type PrivateGPT struct {
 	TopK    int
 	TopP    float64
 
-	client *gpt4all.Model
+	client *gollama.LLama
 	Out    strings.Builder
 }
 
@@ -33,7 +33,7 @@ func (p *PrivateGPT) tokenCallback(token string) bool {
 }
 
 func (p *PrivateGPT) Load() error {
-	l, err := gpt4all.New(p.Model, gpt4all.SetThreads(p.Threads))
+	l, err := gollama.New(p.Model)
 	if err != nil {
 		return err
 	}
@@ -45,9 +45,10 @@ func (p *PrivateGPT) Load() error {
 func (p *PrivateGPT) Predict(input string) error {
 	_, err := p.client.Predict(
 		input,
-		gpt4all.SetTokens(p.Tokens),
-		gpt4all.SetTopK(p.TopK),
-		gpt4all.SetTopP(p.TopP),
+		gollama.SetThreads(p.Threads),
+		gollama.SetTokens(p.Tokens),
+		gollama.SetTopK(p.TopK),
+		gollama.SetTopP(p.TopP),
 	)
 	return err
 }

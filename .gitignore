@@ -2,3 +2,5 @@
 /gpt4all
 /models
 /libgpt4all.a
+/ggml-metal.metal
+/go-llama.cpp

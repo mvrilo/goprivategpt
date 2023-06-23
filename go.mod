@@ -3,7 +3,7 @@ module github.com/mvrilo/goprivategpt
 go 1.20
 
 require (
-	github.com/nomic-ai/gpt4all/gpt4all-bindings/golang v0.0.0-20230622161949-a4230754039f
+	github.com/go-skynet/go-llama.cpp v0.0.0-20230622210705-2c0a316c64f7
 	github.com/spf13/cobra v1.7.0
 )
 
@@ -12,4 +12,4 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 )
 
-replace github.com/nomic-ai/gpt4all/gpt4all-bindings/golang v0.0.0-20230622161949-a4230754039f => ./gpt4all/gpt4all-bindings/golang
+replace github.com/go-skynet/go-llama.cpp v0.0.0-20230622210705-2c0a316c64f7 => ./go-llama.cpp
