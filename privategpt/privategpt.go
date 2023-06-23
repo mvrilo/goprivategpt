@@ -1,54 +1,37 @@
 package goprivategpt
 
-import (
-	"strings"
-
-	gollama "github.com/go-skynet/go-llama.cpp"
-)
-
 type PrivateGPT struct {
-	Model   string
-	Threads int
-	Tokens  int
-	TopK    int
-	TopP    float64
-
-	client *gollama.LLama
-	Out    strings.Builder
+	llm    *LLM
+	Server *Server
 }
 
 func New(model string, threads, tokens int) (*PrivateGPT, error) {
+	llm, err := NewLLM(model, threads, tokens)
+	if err != nil {
+		return nil, err
+	}
+	server, err := NewServer(llm)
+	if err != nil {
+		return nil, err
+	}
 	return &PrivateGPT{
-		Model:   model,
-		Threads: threads,
-		Tokens:  tokens,
-		TopK:    90,
-		TopP:    0.86,
+		llm:    llm,
+		server: server,
 	}, nil
 }
 
-func (p *PrivateGPT) tokenCallback(token string) bool {
-	p.Out.WriteString(token)
-	return true
-}
-
-func (p *PrivateGPT) Load() error {
-	l, err := gollama.New(p.Model)
-	if err != nil {
-		return err
-	}
-	l.SetTokenCallback(p.tokenCallback)
-	p.client = l
-	return nil
-}
-
 func (p *PrivateGPT) Predict(input string) error {
-	_, err := p.client.Predict(
-		input,
-		gollama.SetThreads(p.Threads),
-		gollama.SetTokens(p.Tokens),
-		gollama.SetTopK(p.TopK),
-		gollama.SetTopP(p.TopP),
-	)
-	return err
+	return p.llm.Predict(input)
+}
+
+func (p *PrivateGPT) Response() string {
+	return p.llm.Response()
+}
+
+func (p *PrivateGPT) Shutdown() error {
+	return p.Server.Shutdown()
+}
+
+func (p *PrivateGPT) Start(addr string) error {
+	return p.Server.Start(addr)
 }

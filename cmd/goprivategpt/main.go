@@ -1,19 +1,25 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	goprivategpt "github.com/mvrilo/goprivategpt/privategpt"
 	"github.com/spf13/cobra"
 )
 
 var (
-	model   string
 	threads int
 	tokens  int
+	model   string
 	prompt  string
+	addr    string
 )
 
 func privategpt(model string, threads, tokens int) *goprivategpt.PrivateGPT {
@@ -21,19 +27,19 @@ func privategpt(model string, threads, tokens int) *goprivategpt.PrivateGPT {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	err = pgpt.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	return pgpt
 }
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "goprivategpt",
-		Short: "goprivategpt is a way for you interact to your documents",
+		Use:                   "goprivategpt",
+		Short:                 "A way for you interact to your documents",
+		DisableAutoGenTag:     true,
+		DisableSuggestions:    true,
+		DisableFlagsInUseLine: true,
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
 	}
 
 	flags := rootCmd.PersistentFlags()
@@ -43,7 +49,7 @@ func main() {
 
 	askCmd := &cobra.Command{
 		Use:   "ask",
-		Short: "ask completes a given input",
+		Short: "completes a given input",
 		Run: func(cmd *cobra.Command, args []string) {
 			pgpt := privategpt(model, threads, tokens)
 
@@ -52,11 +58,36 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(pgpt.Out.String())
+			fmt.Println(pgpt.Response())
 		},
 	}
 	askCmd.PersistentFlags().StringVarP(&prompt, "prompt", "p", "", "input text")
+
+	serverCmd := &cobra.Command{
+		Use:   "server",
+		Short: "starts the http server",
+		Run: func(cmd *cobra.Command, args []string) {
+			pgpt := privategpt(model, threads, tokens)
+
+			ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+			defer stop()
+
+			go func() {
+				if err := pgpt.Start(addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+					log.Fatal(err)
+				}
+			}()
+
+			select {
+			case <-ctx.Done():
+				pgpt.Shutdown()
+			}
+		},
+	}
+	serverCmd.PersistentFlags().StringVarP(&addr, "address", "a", ":8000", "address of the http server")
+
 	rootCmd.AddCommand(askCmd)
+	rootCmd.AddCommand(serverCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)

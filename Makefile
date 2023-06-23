@@ -19,7 +19,8 @@ build:
 go-llama.cpp:
 	git clone --recursive https://github.com/go-skynet/go-llama.cpp
 
-gpt4all: gpt4all/gpt4all-bindings/golang/libgpt4all.a:
+gpt4all: gpt4all/gpt4all-bindings/golang/libgpt4all.a
+
 gpt4all/gpt4all-bindings/golang/libgpt4all.a:
 	git clone --recursive https://github.com/nomic-ai/gpt4all
 	(cd gpt4all/gpt4all-bindings/golang; make libgpt4all.a || true)
