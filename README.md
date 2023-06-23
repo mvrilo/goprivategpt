@@ -1,6 +1,6 @@
 # goprivategpt
 
-An implementation of privateGPT in Go.
+WIP implementation of privateGPT in Go.
 
 ### Usage
 
