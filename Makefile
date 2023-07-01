@@ -3,7 +3,7 @@
 INCLUDE_PATH := $(abspath ./go-llama.cpp)
 LIBRARY_PATH := $(abspath ./go-llama.cpp)
 
-all: clean go-llama.cpp build
+all: clean go-llama.cpp build-metal
 
 build-metal: go-llama.cpp
 	(cd go-llama.cpp || exit 1; BUILD_TYPE=metal make clean libbinding.a);
@@ -19,11 +19,5 @@ build:
 go-llama.cpp:
 	git clone --recursive https://github.com/go-skynet/go-llama.cpp
 
-gpt4all: gpt4all/gpt4all-bindings/golang/libgpt4all.a
-
-gpt4all/gpt4all-bindings/golang/libgpt4all.a:
-	git clone --recursive https://github.com/nomic-ai/gpt4all
-	(cd gpt4all/gpt4all-bindings/golang; make libgpt4all.a || true)
-
 clean:
-	rm -rf gpt4all go-llama.cpp
+	rm -rf go-llama.cpp goprivategpt
