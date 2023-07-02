@@ -1,6 +1,8 @@
 package goprivategpt
 
 import (
+	"context"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -8,14 +10,14 @@ import (
 
 type Server struct {
 	*fiber.App
-	llm *LLM
+	pgpt *PrivateGPT
 }
 
-func NewServer(llm *LLM) (*Server, error) {
+func NewServer(pgpt *PrivateGPT) (*Server, error) {
 	app := fiber.New()
 	app.Use(logger.New())
 	app.Use(requestid.New())
-	srv := &Server{app, llm}
+	srv := &Server{app, pgpt}
 	return srv, nil
 }
 
@@ -28,16 +30,14 @@ func (s *Server) askHandler(c *fiber.Ctx) error {
 		return c.Status(400).SendString("empty prompt")
 	}
 
-	err := s.llm.Predict(prompt)
+	res, err := s.pgpt.Predict(context.Background(), prompt)
 	if err != nil {
 		return err
 	}
 
 	println("Prompt: ", prompt)
-	msg := s.llm.Response()
-	println("Response: ", msg)
-
-	return c.JSON(map[string]any{"message": msg})
+	println("Response: ", res)
+	return c.JSON(map[string]any{"message": res})
 }
 
 func (s *Server) router() {
