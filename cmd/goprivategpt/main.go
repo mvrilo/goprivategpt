@@ -69,7 +69,7 @@ func privategpt(withLLM bool) *goprivategpt.PrivateGPT {
 func main() {
 	rootCmd := &cobra.Command{
 		Use:                   "goprivategpt",
-		Short:                 "A way for you interact to your documents",
+		Short:                 "A way for you to interact with your documents.",
 		DisableAutoGenTag:     true,
 		DisableSuggestions:    true,
 		DisableFlagsInUseLine: true,

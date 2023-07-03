@@ -11,7 +11,7 @@ Supported extensions:
 ### Usage
 
 ```
-A way for you interact to your documents
+A way for you to interact with your documents.
 
 Usage:
   goprivategpt [command]
