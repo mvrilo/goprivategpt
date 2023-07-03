@@ -39,8 +39,8 @@ fullcheck:
 		sleep 2; \
 		echo 'Ingesting documents from ./testdata'; \
 		./goprivategpt ingest -i ./testdata 2>/dev/null >/dev/null && \
-		echo 'Prompt: What damage did zero cool caused?'; \
-		./goprivategpt ask -p 'What damage did zero cool caused?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin 2>/dev/null; \
+		echo 'Prompt: What damage did zero cool cause?'; \
+		./goprivategpt ask -p 'What damage did zero cool cause?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin 2>/dev/null; \
 	)
 
 clean:
