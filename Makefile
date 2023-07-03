@@ -31,17 +31,17 @@ fullcheck:
 		echo 'Building goprivategpt'; \
 		make lint clean build-metal 2>/dev/null >/dev/null && \
 		echo 'Cleaning up weaviate container'; \
-		docker compose -f ./testdata/docker-compose.yml ps goprivategpt_weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
+		docker compose -f ./testdata/docker-compose.yml ps weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
 		rm -rf ./data/weaviate/* || true 2>/dev/null; \
 		sleep 4; \
 		echo 'Deploying weaviate container'; \
-		docker compose -f ./testdata/docker-compose.yml up -d --force-recreate goprivategpt_weaviate 2>/dev/null >/dev/null && \
+		docker compose -f ./testdata/docker-compose.yml up -d --force-recreate weaviate 2>/dev/null >/dev/null && \
 		sleep 4; \
 		echo 'Ingesting documents from ./testdata'; \
 		./goprivategpt ingest -i ./testdata 2>/dev/null >/dev/null && \
 		sleep 4; \
 		echo 'Prompt: What damage did zero cool cause?'; \
-		./goprivategpt ask -p 'What damage did zero cool cause?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin 2>/dev/null; \
+		./goprivategpt ask -p 'What damage did zero cool cause?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin; \
 	)
 
 clean:
