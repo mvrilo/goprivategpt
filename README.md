@@ -8,6 +8,10 @@ Supported extensions:
 - `csv`
 - `html`
 
+Supported vector stores:
+
+- `weaviate`
+
 ### Usage
 
 ```

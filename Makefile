@@ -1,4 +1,4 @@
-.PHONY: all build build-metal clean docker lint full
+.PHONY: all build build-metal clean docker lint fullcheck
 
 INCLUDE_PATH := $(abspath ./go-llama.cpp)
 LIBRARY_PATH := $(abspath ./go-llama.cpp)
@@ -26,16 +26,22 @@ go-llama.cpp:
 docker:
 	docker build . -t mvrilo/goprivategpt
 
-full:
-	make lint clean build-metal && \
-	docker compose ps -aq | xargs -o docker rm -f; \
-	sleep 2; \
-	rm -rf ./data/weaviate/*; \
-	sleep 2; \
-	docker compose up -d weaviate && \
-	sleep 2; \
-	./goprivategpt ingest && \
-	./goprivategpt ask -p 'Where Murilo Santana lives?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin
+fullcheck: goprivategpt
+	@( \
+		echo 'Building goprivategpt'; \
+		make lint clean build-metal 2>/dev/null >/dev/null && \
+		echo 'Cleaning up weaviate container'; \
+		docker compose -f ./testdata/docker-compose.yml ps goprivategpt_weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
+		rm -rf ./data/weaviate/* || true 2>/dev/null; \
+		sleep 2; \
+		echo 'Deploying weaviate container'; \
+		docker compose -f ./testdata/docker-compose.yml up -d --force-recreate goprivategpt_weaviate 2>/dev/null >/dev/null && \
+		sleep 2; \
+		echo 'Ingesting documents from ./testdata'; \
+		./goprivategpt ingest -i ./testdata 2>/dev/null >/dev/null && \
+		echo 'Prompt: What damage did zero cool caused?'; \
+		./goprivategpt ask -p 'What damage did zero cool caused?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin 2>/dev/null; \
+	)
 
 clean:
-	rm -rf go-llama.cpp goprivategpt
+	rm -rf ./go-llama.cpp ./goprivategpt

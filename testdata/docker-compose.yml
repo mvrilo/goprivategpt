@@ -1,18 +1,18 @@
 version: '3.4'
 services:
-  goprivategpt:
-    container_name: goprivategpt
-    hostname: goprivategpt
-    image: mvrilo/goprivategpt
-    build: .
-    command: server -a :8000 -i /documents
-    ports:
-      - 8000:8000
-    volumes:
-      - ./documents:/documents
+  # goprivategpt:
+  #   container_name: goprivategpt_server
+  #   hostname: goprivategpt_server
+  #   image: mvrilo/goprivategpt
+  #   build: .
+  #   command: server -a :8000 -i /documents
+  #   ports:
+  #     - 8000:8000
+  #   volumes:
+  #     - ./documents:/documents
   weaviate:
-    container_name: weaviate
-    hostname: weaviate
+    container_name: goprivategpt_weaviate
+    hostname: goprivategpt_weaviate
     image: semitechnologies/weaviate:1.19.9
     ports:
       - 8080:8080

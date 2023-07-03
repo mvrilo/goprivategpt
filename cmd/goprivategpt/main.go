@@ -87,8 +87,12 @@ func main() {
 		Use:   "ask",
 		Short: "completes a given input",
 		Run: func(cmd *cobra.Command, args []string) {
-			pgpt := privategpt(true)
 			input := cmd.Flag("prompt").Value.String()
+			if input == "" {
+				cmd.Help()
+				return
+			}
+			pgpt := privategpt(true)
 			res, err := pgpt.Predict(context.Background(), input)
 			if err != nil {
 				log.Fatal(err)
@@ -99,14 +103,18 @@ func main() {
 	}
 	askFlags := askCmd.PersistentFlags()
 	askFlags.StringVarP(&prompt, "prompt", "p", "", "input text")
-	askFlags.StringVarP(&model, "model", "m", "models/GPT4All-13B-snoozy.ggmlv3.q4_0.bin", "Filepath of the model")
+	askFlags.StringVarP(&model, "model", "m", "models/open-llama-7B-open-instruct.ggmlv3.q2_K.bin", "Filepath of the model")
 
 	ingestCmd := &cobra.Command{
 		Use:   "ingest",
 		Short: "ingest documents from datastore",
 		Run: func(cmd *cobra.Command, args []string) {
+			datadir := cmd.Flag("source_dir").Value.String()
+			if datadir == "" {
+				cmd.Help()
+				return
+			}
 			pgpt := privategpt(false)
-			datadir := cmd.Flag("datadir").Value.String()
 			err := pgpt.IngestDocuments(context.Background(), datadir)
 			if err != nil {
 				log.Fatal(err)
@@ -114,7 +122,7 @@ func main() {
 			os.Exit(0)
 		},
 	}
-	ingestCmd.PersistentFlags().StringVarP(&datadir, "datadir", "i", "./docs", "directory to ingest documents")
+	ingestCmd.PersistentFlags().StringVarP(&datadir, "source_dir", "i", "./documents", "Directory to ingest documents")
 
 	serverCmd := &cobra.Command{
 		Use:   "server",
@@ -142,7 +150,7 @@ func main() {
 	}
 	serverFlags := serverCmd.PersistentFlags()
 	serverFlags.StringVarP(&serveraddr, "address", "a", ":8000", "address of the http server")
-	serverFlags.StringVarP(&model, "model", "m", "models/GPT4All-13B-snoozy.ggmlv3.q4_0.bin", "Filepath of the model")
+	serverFlags.StringVarP(&model, "model", "m", "models/open-llama-7B-open-instruct.ggmlv3.q2_K.bin", "Filepath of the model")
 
 	rootCmd.AddCommand(askCmd)
 	rootCmd.AddCommand(ingestCmd)

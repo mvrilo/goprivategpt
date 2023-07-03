@@ -49,6 +49,7 @@ func NewLLM(model string) (*LLM, error) {
 func (o *LLM) tokenCallback(token string) bool {
 	_, err := o.buf.WriteString(token)
 	if err != nil {
+		print(token)
 		// todo: log
 		return false
 	}
