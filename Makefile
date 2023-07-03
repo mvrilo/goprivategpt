@@ -26,7 +26,7 @@ go-llama.cpp:
 docker:
 	docker build . -t mvrilo/goprivategpt
 
-fullcheck: goprivategpt
+fullcheck:
 	@( \
 		echo 'Building goprivategpt'; \
 		make lint clean build-metal 2>/dev/null >/dev/null && \

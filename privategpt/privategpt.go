@@ -17,6 +17,10 @@ import (
 )
 
 func newLoader(ext string, r io.Reader) documentloaders.Loader {
+	if len(ext) < 2 {
+		return nil
+	}
+
 	switch ext[1:] {
 	case "md", "markdown", "html", "htm":
 		return documentloaders.NewHTML(r)

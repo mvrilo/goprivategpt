@@ -22,4 +22,4 @@ services:
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
       DEFAULT_VECTORIZER_MODULE: 'none'
     volumes:
-      - ./data/weaviate:/var/lib/weaviate
+      - ../data/testweaviate:/var/lib/weaviate
