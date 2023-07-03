@@ -31,13 +31,11 @@ full:
 	docker compose ps -aq | xargs -o docker rm -f; \
 	sleep 2; \
 	rm -rf ./data/weaviate/*; \
+	sleep 2; \
 	docker compose up -d weaviate && \
 	sleep 2; \
-	echo 'ingesting --'; \
 	./goprivategpt ingest && \
-	sleep 2; \
-	echo 'asking --'; \
-	./goprivategpt ask -m ./models/wizardLM-7B.ggmlv3.q4_0.bin -p 'where murilo santana lives?'
+	./goprivategpt ask -p 'Where Murilo Santana lives?'
 
 clean:
 	rm -rf go-llama.cpp goprivategpt

@@ -93,12 +93,13 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("result:", res)
+			fmt.Println("Result:", res)
+			os.Exit(0)
 		},
 	}
 	askFlags := askCmd.PersistentFlags()
 	askFlags.StringVarP(&prompt, "prompt", "p", "", "input text")
-	askFlags.StringVarP(&model, "model", "m", "models/vicuna-7b-v1.3.ggmlv3.q4_0.bin", "Filepath of the model")
+	askFlags.StringVarP(&model, "model", "m", "models/GPT4All-13B-snoozy.ggmlv3.q4_0.bin", "Filepath of the model")
 
 	ingestCmd := &cobra.Command{
 		Use:   "ingest",

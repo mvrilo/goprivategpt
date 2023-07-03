@@ -48,7 +48,6 @@ func (p *PrivateGPT) IngestDocuments(ctx context.Context, datadir string) error 
 	if err != nil {
 		return err
 	}
-	fmt.Println("docs:", len(docs), docs[0])
 	return p.Store.AddDocuments(ctx, docs, vectorstores.WithNameSpace("docs"))
 }
 
@@ -73,7 +72,6 @@ func (p *PrivateGPT) LoadDocuments(ctx context.Context, datadir string) ([]schem
 			// just skips
 			fmt.Printf("no loader found for ext: %s\n", ext)
 			return nil
-			// return fmt.Errorf("no loader found for ext: %s", ext)
 		}
 
 		println("loading file:", full)
@@ -89,7 +87,8 @@ func (p *PrivateGPT) LoadDocuments(ctx context.Context, datadir string) ([]schem
 }
 func (p *PrivateGPT) Predict(ctx context.Context, input string) (string, error) {
 	template := `Introduction:
-You are a private virtual assistant that responds to questions based on some context extracted from documents that the user provided. If you don't now the answer, just reply: I don't know.
+You are a private virtual assistant that responds to questions based on some context extracted from documents that the user provided.
+If you know the answer, be direct and brief. If you don't now the answer, just reply: I don't know.
 -
 Context:
 {{.context}}
@@ -97,8 +96,8 @@ Context:
 Question:
 {{.question}}
 -
-Answer:
-`
+Answer:`
+
 	prompt := prompts.NewPromptTemplate(template, []string{"question", "context"})
 	combineChain := chains.NewStuffDocuments(chains.NewLLMChain(p.LLM, prompt))
 
