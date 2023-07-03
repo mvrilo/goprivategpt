@@ -129,7 +129,7 @@ func main() {
 			defer stop()
 
 			go func() {
-				if err := server.Listen(serveraddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				if err := server.Start(serveraddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					log.Fatal(err)
 				}
 			}()

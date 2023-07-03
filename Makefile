@@ -35,7 +35,7 @@ full:
 	docker compose up -d weaviate && \
 	sleep 2; \
 	./goprivategpt ingest && \
-	./goprivategpt ask -p 'Where Murilo Santana lives?'
+	./goprivategpt ask -p 'Where Murilo Santana lives?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin
 
 clean:
 	rm -rf go-llama.cpp goprivategpt
