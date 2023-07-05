@@ -1,15 +1,5 @@
 version: '3.4'
 services:
-  # goprivategpt:
-  #   container_name: goprivategpt_server
-  #   hostname: goprivategpt_server
-  #   image: mvrilo/goprivategpt
-  #   build: .
-  #   command: server -a :8000 -i /documents
-  #   ports:
-  #     - 8000:8000
-  #   volumes:
-  #     - ./documents:/documents
   weaviate:
     container_name: goprivategpt_weaviate
     hostname: goprivategpt_weaviate
@@ -22,4 +12,4 @@ services:
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
       DEFAULT_VECTORIZER_MODULE: 'none'
     volumes:
-      - ../data/testweaviate:/var/lib/weaviate
+      - ./tmp/goprivategpt_weaviate_test:/var/lib/weaviate

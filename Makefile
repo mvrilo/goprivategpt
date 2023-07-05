@@ -26,20 +26,18 @@ go-llama.cpp:
 docker:
 	docker build . -t mvrilo/goprivategpt
 
-fullcheck:
+fullcheck: goprivategpt
 	@( \
-		echo 'Building goprivategpt'; \
-		make lint clean build-metal 2>/dev/null >/dev/null && \
 		echo 'Cleaning up weaviate container'; \
-		docker compose -f ./testdata/docker-compose.yml ps goprivategpt_weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
-		rm -rf ./data/weaviate/* || true 2>/dev/null; \
-		sleep 4; \
+		docker compose -f ./testdata/docker-compose.yml ps weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
+		rm -rf ./testdata/tmp/* || true 2>/dev/null; \
+		mkdir ./testdata/tmp/goprivategpt_weaviate_test || true 2>/dev/null; \
 		echo 'Deploying weaviate container'; \
-		docker compose -f ./testdata/docker-compose.yml up -d --force-recreate goprivategpt_weaviate 2>/dev/null >/dev/null && \
-		sleep 4; \
-		echo 'Ingesting documents from ./testdata'; \
-		./goprivategpt ingest -i ./testdata 2>/dev/null >/dev/null && \
-		sleep 4; \
+		docker compose -f ./testdata/docker-compose.yml up -d weaviate >/dev/null && \
+		sleep 10; \
+		echo 'Ingesting documents from ./testdata' || exit 1; \
+		./goprivategpt ingest -i ./testdata/docs 2>/dev/null >/dev/null && \
+		sleep 5; \
 		echo 'Prompt: What damage did zero cool cause?'; \
 		./goprivategpt ask -p 'What damage did zero cool cause?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin; \
 		)
