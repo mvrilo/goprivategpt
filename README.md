@@ -12,6 +12,10 @@ Supported vector stores:
 
 - `weaviate`
 
+Requirements:
+
+- ggml supported model
+
 ### Building
 
 Mac:
