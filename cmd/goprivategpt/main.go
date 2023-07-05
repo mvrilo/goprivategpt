@@ -37,7 +37,7 @@ func privategpt(withLLM bool) *goprivategpt.PrivateGPT {
 	)
 
 	if withLLM {
-		llm, err = gollama.NewLLM(model)
+		llm, err = gollama.NewLLM(model, threads, true)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -79,9 +79,9 @@ func main() {
 	}
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVarP(&storeaddr, "storeaddr", "s", "localhost:8080", "vector store address")
-	flags.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "Number of threads")
-	flags.IntVarP(&tokens, "tokens", "n", 512, "Number of max tokens")
+	flags.StringVarP(&storeaddr, "storeaddr", "s", "localhost:8080", "Vector store address")
+	flags.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "Number of threads for LLM")
+	flags.IntVarP(&tokens, "tokens", "n", 512, "Number of max tokens in response")
 
 	askCmd := &cobra.Command{
 		Use:   "ask",
@@ -107,7 +107,7 @@ func main() {
 
 	ingestCmd := &cobra.Command{
 		Use:   "ingest",
-		Short: "ingest documents from datastore",
+		Short: "Ingests documents from source directory into the vector store",
 		Run: func(cmd *cobra.Command, args []string) {
 			datadir := cmd.Flag("source_dir").Value.String()
 			if datadir == "" {
@@ -126,7 +126,7 @@ func main() {
 
 	serverCmd := &cobra.Command{
 		Use:   "server",
-		Short: "starts the http server",
+		Short: "Starts the http server",
 		Run: func(cmd *cobra.Command, args []string) {
 			pgpt := privategpt(true)
 			server, err := goprivategpt.NewServer(pgpt)

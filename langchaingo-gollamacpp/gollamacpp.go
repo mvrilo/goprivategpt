@@ -21,12 +21,14 @@ var (
 )
 
 type LLM struct {
-	buf    *bytes.Buffer
-	client *gollama.LLama
+	buf     *bytes.Buffer
+	client  *gollama.LLama
+	caching bool
+	threads int
 }
 
 // New returns a new LLama LLM.
-func NewLLM(model string) (*LLM, error) {
+func NewLLM(model string, threads int, caching bool) (*LLM, error) {
 	client, err := gollama.New(
 		model,
 		gollama.EnableF16Memory,
@@ -39,8 +41,9 @@ func NewLLM(model string) (*LLM, error) {
 	}
 	buf := bytes.NewBuffer(nil)
 	llm := &LLM{
-		client: client,
-		buf:    buf,
+		client:  client,
+		buf:     buf,
+		threads: threads,
 	}
 	client.SetTokenCallback(llm.tokenCallback)
 	return llm, nil
@@ -74,10 +77,20 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	for _, opt := range options {
 		opt(&opts)
 	}
-	result, err := o.client.Predict(
-		prompts[0],
+
+	gollamaOpts := []gollama.PredictOption{
 		gollama.SetTokens(opts.MaxTokens),
 		gollama.SetStopWords(opts.StopWords...),
+		gollama.SetThreads(o.threads),
+	}
+
+	if o.caching {
+		gollamaOpts = append(gollamaOpts, gollama.EnablePromptCacheAll)
+	}
+
+	result, err := o.client.Predict(
+		prompts[0],
+		gollamaOpts...,
 	)
 	if err != nil {
 		return nil, err

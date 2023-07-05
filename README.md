@@ -1,8 +1,8 @@
 # goprivategpt
 
-Implementation of PrivateGPT in Go using `langchaingo` and `go-llama.cpp`.
+Implementation of PrivateGPT in Go using [langchaingo](https://github.com/tmc/langchaingo) and [go-llama.cpp](https://github.com/go-skynet/go-llama.cpp).
 
-Supported extensions:
+Supported file extensions:
 
 - `txt`
 - `csv`
@@ -11,6 +11,16 @@ Supported extensions:
 Supported vector stores:
 
 - `weaviate`
+
+### Building
+
+Mac:
+
+`make build-metal`
+
+Linux:
+
+`make build`
 
 ### Usage
 
