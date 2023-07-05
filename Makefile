@@ -26,8 +26,10 @@ go-llama.cpp:
 docker:
 	docker build . -t mvrilo/goprivategpt
 
-fullcheck: goprivategpt
+fullcheck:
 	@( \
+		echo 'Build goprivategpt'; \
+		make lint clean build-metal >/dev/null 2>/dev/null || exit 1; \
 		echo 'Cleaning up weaviate container'; \
 		docker compose -f ./testdata/docker-compose.yml ps weaviate -q 2>/dev/null | xargs -o docker rm -f 2>/dev/null >/dev/null ; \
 		rm -rf ./testdata/tmp/* || true 2>/dev/null; \
