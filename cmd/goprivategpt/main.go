@@ -20,6 +20,8 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/weaviate"
 )
 
+const defaultModel = "models/orca-mini-7b.ggmlv3.q4_0.bin"
+
 var (
 	threads    int
 	tokens     int
@@ -103,7 +105,7 @@ func main() {
 	}
 	askFlags := askCmd.PersistentFlags()
 	askFlags.StringVarP(&prompt, "prompt", "p", "", "input text")
-	askFlags.StringVarP(&model, "model", "m", "models/open-llama-7B-open-instruct.ggmlv3.q2_K.bin", "Filepath of the model")
+	askFlags.StringVarP(&model, "model", "m", defaultModel, "Filepath of the model")
 
 	ingestCmd := &cobra.Command{
 		Use:   "ingest",
@@ -150,7 +152,7 @@ func main() {
 	}
 	serverFlags := serverCmd.PersistentFlags()
 	serverFlags.StringVarP(&serveraddr, "address", "a", ":8000", "address of the http server")
-	serverFlags.StringVarP(&model, "model", "m", "models/open-llama-7B-open-instruct.ggmlv3.q2_K.bin", "Filepath of the model")
+	serverFlags.StringVarP(&model, "model", "m", defaultModel, "Filepath of the model")
 
 	rootCmd.AddCommand(askCmd)
 	rootCmd.AddCommand(ingestCmd)

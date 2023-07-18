@@ -22,6 +22,12 @@ func newLoader(ext string, r io.Reader) documentloaders.Loader {
 	}
 
 	switch ext[1:] {
+	case "pdf":
+		rr, ok := r.(io.ReaderAt)
+		if !ok {
+			return nil
+		}
+		return documentloaders.NewPDF(rr, 0)
 	case "md", "markdown", "html", "htm":
 		return documentloaders.NewHTML(r)
 	case "text", "txt":
@@ -90,17 +96,17 @@ func (p *PrivateGPT) LoadDocuments(ctx context.Context, datadir string) ([]schem
 	return docs, err
 }
 func (p *PrivateGPT) Predict(ctx context.Context, input string) (string, error) {
-	template := `Introduction:
-You are a private virtual assistant that responds to questions based on some context extracted from documents that the user provided.
-If you know the answer, be direct and brief. If you don't now the answer, just reply: I don't know.
--
-Context:
+	template := `# Introduction:
+You are a virtual assistant that responds to questions based on some context extracted from documents that the user provided.
+If you know the answer, be direct. If you don't now the answer, just reply: I don't know.
+---
+# Context:
 {{.context}}
--
-Question:
+---
+# Question:
 {{.question}}
--
-Answer:`
+---
+# Answer:`
 
 	prompt := prompts.NewPromptTemplate(template, []string{"question", "context"})
 	combineChain := chains.NewStuffDocuments(chains.NewLLMChain(p.LLM, prompt))

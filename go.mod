@@ -6,7 +6,7 @@ require (
 	github.com/go-skynet/go-llama.cpp v0.0.0-20230622210705-2c0a316c64f7
 	github.com/gofiber/fiber/v2 v2.47.0
 	github.com/spf13/cobra v1.7.0
-	github.com/tmc/langchaingo v0.0.0-20230701162323-81dcfa6b690d
+	github.com/tmc/langchaingo v0.0.0-20230713201705-dcf7ecdc8ac8
 )
 
 require (
@@ -49,6 +49,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
+	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -75,7 +76,7 @@ require (
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect

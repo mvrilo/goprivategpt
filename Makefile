@@ -41,7 +41,7 @@ fullcheck:
 		./goprivategpt ingest -i ./testdata/docs 2>/dev/null >/dev/null && \
 		sleep 5; \
 		echo 'Prompt: What damage did zero cool cause?'; \
-		./goprivategpt ask -p 'What damage did zero cool cause?' -m ./models/orca-mini-7b.ggmlv3.q4_0.bin; \
+		time ./goprivategpt ask -p 'What damage did zero cool cause?' \
 		)
 
 clean:

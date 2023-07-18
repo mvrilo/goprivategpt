@@ -4,6 +4,6 @@
 /libgpt4all.a
 /ggml-metal.metal
 /go-llama.cpp
-/docs/*
 /data/*
 /testdata/tmp
+/documents/*
