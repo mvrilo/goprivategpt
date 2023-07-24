@@ -2,7 +2,6 @@ package goprivategpt
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -79,12 +78,11 @@ func (p *PrivateGPT) LoadDocuments(ctx context.Context, datadir string) ([]schem
 		ext := filepath.Ext(full)
 		loader := newLoader(ext, f)
 		if loader == nil {
-			// just skips
-			fmt.Printf("no loader found for ext: %s\n", ext)
+			// skip
+			// fmt.Printf("no loader found for ext: %s\n", ext)
 			return nil
 		}
 
-		println("loading file:", full)
 		doc, err := loader.Load(ctx)
 		if err != nil {
 			return err
@@ -95,18 +93,21 @@ func (p *PrivateGPT) LoadDocuments(ctx context.Context, datadir string) ([]schem
 	})
 	return docs, err
 }
+
 func (p *PrivateGPT) Predict(ctx context.Context, input string) (string, error) {
-	template := `# Introduction:
-You are a virtual assistant that responds to questions based on some context extracted from documents that the user provided.
-If you know the answer, be direct. If you don't now the answer, just reply: I don't know.
----
-# Context:
+	template := `You are a virtual Assistant that responds to questions based on some context extracted from documents that the User provided.
+If you know the answer, be direct. If you don't now the answer, just reply something like: "I don't know".
+
+
+## Context:
 {{.context}}
----
-# Question:
+
+
+## User input:
 {{.question}}
----
-# Answer:`
+
+
+## Assistant answer:`
 
 	prompt := prompts.NewPromptTemplate(template, []string{"question", "context"})
 	combineChain := chains.NewStuffDocuments(chains.NewLLMChain(p.LLM, prompt))

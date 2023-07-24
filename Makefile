@@ -1,30 +1,44 @@
-.PHONY: all build build-metal clean docker lint fullcheck
+.PHONY: all build build-metal clean docker lint fullcheck cdeps
+
+SQLITE_VSS := $(abspath ./sqlite-vss/dist/release)
+LLAMA := $(abspath ./go-llama.cpp)
 
 INCLUDE_PATH := $(abspath ./go-llama.cpp)
 LIBRARY_PATH := $(abspath ./go-llama.cpp)
+BUILD_FLAGS := C_INCLUDE_PATH=${LLAMA}:${SQLITE_VSS} LIBRARY_PATH=${LLAMA}:${SQLITE_VSS}
+METAL_FLAGS := -framework Foundation -framework Metal -framework MetalKit -framework MetalPerformanceShaders
+CGO_FLAGS := -L$(abspath ./go-llama.cpp) -L$(abspath ./sqlite-vss/dist/release) -L/opt/homebrew/opt/libomp/lib
+CGO_METAL_FLAGS := ${CGO_FLAGS} ${METAL_FLAGS}
 
-all: lint clean build-metal
+all: build-metal
 
 lint:
 	go vet ./...
 
-build-metal: go-llama.cpp
-	(cd go-llama.cpp || exit 1; BUILD_TYPE=metal make clean libbinding.a);
+build-metal: cdeps
+	(cd go-llama.cpp || exit 1; BUILD_TYPE=metal LLAMA_METAL=1 make clean libbinding.a);
 	cp go-llama.cpp/llama.cpp/ggml-metal.metal ./ggml-metal.metal;
-	C_INCLUDE_PATH=${INCLUDE_PATH} CGO_LDFLAGS=${CGO_LDFLAGS} LIBRARY_PATH=${LIBRARY_PATH} \
-								 CGO_LDFLAGS='-framework Foundation -framework Metal -framework MetalKit -framework MetalPerformanceShaders' \
-								 go build -o goprivategpt ./cmd/goprivategpt/main.go
+	CGO_LDFLAGS='${CGO_METAL_FLAGS}' ${BUILD_FLAGS} \
+		go build -o goprivategpt ./cmd/goprivategpt/main.go
 
-build: go-llama.cpp
+build: cdeps
 	(cd go-llama.cpp || exit 1; make clean libbinding.a);
-	C_INCLUDE_PATH=${INCLUDE_PATH} CGO_LDFLAGS=${CGO_LDFLAGS} LIBRARY_PATH=${LIBRARY_PATH} \
-								 go build -o goprivategpt ./cmd/goprivategpt/main.go
+	CGO_LDFLAGS='${CGO_FLAGS}' ${BUILD_FLAGS} \
+		go build -o goprivategpt ./cmd/goprivategpt/main.go
+
+cdeps: sqlite-vss go-llama.cpp
+
+sqlite-vss:
+	git clone --recursive https://github.com/asg017/sqlite-vss
+	(cd sqlite-vss; /bin/sh ./vendor/get_sqlite.sh) && \
+		(cd sqlite-vss/vendor/sqlite; ./configure && make) && \
+		(cd sqlite-vss; make loadable-release)
 
 go-llama.cpp:
 	git clone --recursive https://github.com/go-skynet/go-llama.cpp
 
-docker:
-	docker build . -t mvrilo/goprivategpt
+# docker:
+# 	docker build . -t mvrilo/goprivategpt
 
 fullcheck:
 	@( \
@@ -45,4 +59,4 @@ fullcheck:
 		)
 
 clean:
-	rm -rf ./go-llama.cpp ./goprivategpt
+	rm -rf ./go-llama.cpp ./sqlite-vss ./goprivategpt

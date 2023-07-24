@@ -1,4 +1,4 @@
-package gollamacpp
+package llama
 
 import (
 	"bytes"
@@ -28,13 +28,14 @@ type LLM struct {
 }
 
 // New returns a new LLama LLM.
-func NewLLM(model string, threads int, caching bool) (*LLM, error) {
+func NewLLM(model string, threads int, context int, caching bool) (*LLM, error) {
 	client, err := gollama.New(
 		model,
-		gollama.EnableF16Memory,
-		gollama.SetContext(512),
+		// gollama.EnableF16Memory,
+		gollama.SetContext(context),
 		gollama.EnableEmbeddings,
-		gollama.SetGPULayers(0),
+		gollama.SetGPULayers(1),
+		gollama.SetMMap(true),
 	)
 	if err != nil {
 		return nil, err
@@ -44,6 +45,7 @@ func NewLLM(model string, threads int, caching bool) (*LLM, error) {
 		client:  client,
 		buf:     buf,
 		threads: threads,
+		caching: caching,
 	}
 	client.SetTokenCallback(llm.tokenCallback)
 	return llm, nil

@@ -9,18 +9,23 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 
-	gollama "github.com/mvrilo/goprivategpt/langchaingo-gollamacpp"
+	"github.com/mvrilo/goprivategpt/llama"
 	goprivategpt "github.com/mvrilo/goprivategpt/privategpt"
+	"github.com/mvrilo/goprivategpt/sqlitevss"
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/weaviate"
 )
 
-const defaultModel = "models/orca-mini-7b.ggmlv3.q4_0.bin"
+// const defaultModel = "models/orca-mini-7b.ggmlv3.q4_0.bin"
+const defaultModel = "models/orca-mini-v2_7b.ggmlv3.q5_1.bin"
+
+// const defaultModel = "models/llama-2-7b.ggmlv3.q4_K_S.bin"
 
 var (
 	threads    int
@@ -33,30 +38,30 @@ var (
 )
 
 func privategpt(withLLM bool) *goprivategpt.PrivateGPT {
-	var (
-		llm llms.LanguageModel
-		err error
-	)
-
-	if withLLM {
-		llm, err = gollama.NewLLM(model, threads, true)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	emb, err := embeddings.NewOpenAI()
+	llm, err := llama.NewLLM(model, threads, 1024, true)
 	if err != nil {
 		log.Fatal(err)
 	}
-	store, err := weaviate.New(
-		weaviate.WithScheme("http"),
-		weaviate.WithHost(storeaddr),
-		weaviate.WithEmbedder(emb),
-		weaviate.WithIndexName("PGPT"),
-		weaviate.WithTextKey("text"),
-		weaviate.WithNameSpaceKey("docs"),
-	)
+
+	var store vectorstores.VectorStore
+	if storeaddr == ":memory:" || !strings.HasPrefix(storeaddr, "http") {
+		store, err = sqlitevss.New(storeaddr)
+	} else {
+		emb, err := embeddings.NewOpenAI()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		store, err = weaviate.New(
+			weaviate.WithScheme("http"),
+			weaviate.WithHost(storeaddr),
+			weaviate.WithEmbedder(emb),
+			weaviate.WithIndexName("PGPT"),
+			weaviate.WithTextKey("text"),
+			weaviate.WithNameSpaceKey("docs"),
+		)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +86,7 @@ func main() {
 	}
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVarP(&storeaddr, "storeaddr", "s", "localhost:8080", "Vector store address")
+	flags.StringVarP(&storeaddr, "storeaddr", "s", "goprivategpt.db", "Vector store address")
 	flags.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "Number of threads for LLM")
 	flags.IntVarP(&tokens, "tokens", "n", 512, "Number of max tokens in response")
 
@@ -99,7 +104,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("Result:", res)
+			fmt.Println(res)
 			os.Exit(0)
 		},
 	}
@@ -117,6 +122,9 @@ func main() {
 				return
 			}
 			pgpt := privategpt(false)
+			// if st, ok := pgpt.Store.(interface{ Close() error }); ok {
+			// 	defer st.Close()
+			// }
 			err := pgpt.IngestDocuments(context.Background(), datadir)
 			if err != nil {
 				log.Fatal(err)
@@ -131,6 +139,10 @@ func main() {
 		Short: "Starts the http server",
 		Run: func(cmd *cobra.Command, args []string) {
 			pgpt := privategpt(true)
+			if st, ok := pgpt.Store.(interface{ Close() error }); ok {
+				defer st.Close()
+			}
+
 			server, err := goprivategpt.NewServer(pgpt)
 			if err != nil {
 				log.Fatal(err)

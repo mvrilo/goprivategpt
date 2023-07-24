@@ -11,10 +11,15 @@ Supported file extensions:
 Supported vector stores:
 
 - `weaviate`
+- `sqlite-vss`
 
-Requirements:
+Requirements for running:
 
-- ggml supported model
+- ggml model
+
+### Dependencies
+
+brew install libomp
 
 ### Building
 
