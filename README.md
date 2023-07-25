@@ -4,32 +4,36 @@ Implementation of PrivateGPT in Go using [langchaingo](https://github.com/tmc/la
 
 Supported file extensions:
 
-- `txt`
 - `csv`
 - `html`
+- `txt`
 
 Supported vector stores:
 
-- `weaviate`
-- `sqlite-vss`
+- [sqlite-vss](https://github.com/asg017/sqlite-vss)
+- [weaviate](https://github.com/weaviate/weaviate)
 
 Requirements for running:
 
-- ggml model
+- `ggml model`
 
 ### Dependencies
 
-brew install libomp
+- `brew install libomp`
 
 ### Building
 
-Mac:
+- Mac:
 
-`make build-metal`
+```
+make build-metal
+```
 
-Linux:
+- Linux:
 
-`make build`
+```
+make build
+```
 
 ### Usage
 
@@ -42,14 +46,14 @@ Usage:
 Available Commands:
   ask         completes a given input
   help        Help about any command
-  ingest      ingest documents from datastore
-  server      starts the http server
+  ingest      Ingests documents from source directory into the vector store
+  server      Starts the http server
 
 Flags:
   -h, --help               help for goprivategpt
-  -s, --storeaddr string   vector store address (default "localhost:8080")
-  -t, --threads int        Number of threads (default 8)
-  -n, --tokens int         Number of max tokens (default 512)
+  -s, --storeaddr string   Vector store filename or address (default "goprivategpt.db")
+  -t, --threads int        Number of threads for LLM (default 8)
+  -n, --tokens int         Number of max tokens in response (default 512)
 
 Use "goprivategpt [command] --help" for more information about a command.
 ```

@@ -110,13 +110,21 @@ func (s *SqliteVSS) encode(text string) string {
 }
 
 func (s *SqliteVSS) AddDocuments(ctx context.Context, docs []schema.Document, _ ...vectorstores.Option) error {
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
+	// tx, err := s.db.BeginTx(ctx, nil)
+	// if err != nil {
+	// 	return err
+	// }
+
+	count := len(docs)
+	println("documents count:", count)
 
 	for _, doc := range docs {
-		res, err := tx.ExecContext(ctx, "INSERT INTO docs(content) VALUES (?)", doc.PageContent)
+		// if i > 0 && i%100 == 0 {
+		// 	perc := (float32(i) / float32(count)) * 100.0
+		// 	fmt.Printf("- progress: %d / %d - %.2f%%\n", i, count, perc)
+		// }
+
+		res, err := s.db.ExecContext(ctx, "INSERT INTO docs(content) VALUES (?)", doc.PageContent)
 		if err != nil {
 			return err
 		}
@@ -126,13 +134,13 @@ func (s *SqliteVSS) AddDocuments(ctx context.Context, docs []schema.Document, _ 
 			return err
 		}
 
-		_, err = tx.ExecContext(ctx, "INSERT INTO vss_docs(rowid, embeddings) VALUES (?, st_encode(?))", id, doc.PageContent)
+		_, err = s.db.ExecContext(ctx, "INSERT INTO vss_docs(rowid, embeddings) VALUES (?, st_encode(?))", id, doc.PageContent)
 		if err != nil {
 			return err
 		}
 	}
 
-	return tx.Commit()
+	return nil
 }
 
 func (s *SqliteVSS) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) {

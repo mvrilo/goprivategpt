@@ -18,14 +18,12 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/weaviate"
 )
 
-// const defaultModel = "models/orca-mini-7b.ggmlv3.q4_0.bin"
 const defaultModel = "models/orca-mini-v2_7b.ggmlv3.q5_1.bin"
-
-// const defaultModel = "models/llama-2-7b.ggmlv3.q4_K_S.bin"
 
 var (
 	threads    int
@@ -38,9 +36,14 @@ var (
 )
 
 func privategpt(withLLM bool) *goprivategpt.PrivateGPT {
-	llm, err := llama.NewLLM(model, threads, 1024, true)
-	if err != nil {
-		log.Fatal(err)
+	var llm llms.LanguageModel
+	var err error
+
+	if withLLM {
+		llm, err = llama.NewLLM(model, threads, 1024, true)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	var store vectorstores.VectorStore
@@ -86,7 +89,7 @@ func main() {
 	}
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVarP(&storeaddr, "storeaddr", "s", "goprivategpt.db", "Vector store address")
+	flags.StringVarP(&storeaddr, "storeaddr", "s", "goprivategpt.db", "Vector store filename or address")
 	flags.IntVarP(&threads, "threads", "t", runtime.NumCPU(), "Number of threads for LLM")
 	flags.IntVarP(&tokens, "tokens", "n", 512, "Number of max tokens in response")
 
